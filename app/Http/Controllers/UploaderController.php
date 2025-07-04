@@ -5,63 +5,81 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use App\Models\VendorFile;
-use Illuminate\Support\Facades\DB; // Impor DB untuk transaksi
-use Illuminate\Support\Facades\Log; // Impor Log untuk mencatat error
+use App\Models\VendorFile; // Pastikan namespace model ini benar
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class UploaderController extends Controller
 {
     public function upload(Request $request, $documentType)
     {
         $request->validate([
-            'file' => 'required|mimes:pdf,png|max:5120',
+            // Sesuaikan validasi jika perlu
+            'file' => 'required|mimes:pdf,png,jpg,jpeg|max:5120',
         ]);
 
-        // Nanti, dapatkan ID ini secara dinamis, misalnya dari user yang login
-        $vendorId = 1; 
-        // $vendorId = auth()->id(); // Contoh dinamis
+        // Nanti, dapatkan ID ini secara dinamis
+        $vendorId = 1;
+        // $vendorId = auth()->id();
 
-        $path = null; // Inisialisasi path di luar try-catch
+        // Inisialisasi variabel untuk error handling
+        $seaweedFsId = null;
 
         try {
             DB::beginTransaction(); // Mulai transaksi
 
             $file = $request->file('file');
-            $uniqueName = $documentType . '-' . Str::uuid() . '.' . $file->getClientOriginalExtension();
+            // Nama file bisa tetap pakai pendekatanmu atau disederhanakan
+            $uniqueName = 'vendor' . $vendorId . '_' . $documentType . '-' . Str::uuid() . '.' . $file->getClientOriginalExtension();
 
-            // 1. Upload ke S3
-            $path = $file->storeAs("vendor/{$vendorId}", $uniqueName, 's3');
-            Storage::disk('s3')->setVisibility($path, 'public');
-
-            // Panggil url() sekali saja
-            $s3Url = Storage::disk('s3')->url($path);
-
-            // 2. Simpan ke Database
-            VendorFile::updateOrCreate(
-                ['vendor_id' => $vendorId, 'document_type' => $documentType],
-                ['filename' => $uniqueName, 's3_path' => $s3Url]
+            // 1. Upload ke SeaweedFS
+            // Kita ganti disk 's3' menjadi 'seaweedfs'
+            // Method 'put' akan mengembalikan ID file dari SeaweedFS
+            $seaweedFsId = Storage::disk('seaweedfs')->put(
+                $uniqueName,
+                file_get_contents($file->getRealPath())
             );
 
-            DB::commit(); // Konfirmasi transaksi jika semua berhasil
+            // Jika gagal upload, seaweedFsId akan null/false
+            if (!$seaweedFsId) {
+                // Lemparkan exception agar masuk ke blok catch
+                throw new \Exception('File upload to SeaweedFS failed.');
+            }
+
+            // 2. Simpan ke Database
+            // Ganti 's3_path' dengan 'seaweedfs_file_id'
+            VendorFile::updateOrCreate(
+                ['vendor_id' => $vendorId, 'document_type' => $documentType],
+                [
+                    'filename' => $uniqueName,
+                    'seaweedfs_file_id' => $seaweedFsId // <-- Simpan ID SeaweedFS
+                ]
+            );
+
+            DB::commit(); // Konfirmasi transaksi
+
+            // Buat URL lengkap untuk respons JSON
+            $fileUrl = rtrim(env('SEAWEEDFS_PUBLIC_URL'), '/') . '/' . $seaweedFsId;
 
             return response()->json([
                 'message' => 'Upload berhasil!',
                 'file_name' => $uniqueName,
-                's3_url' => $s3Url,
+                'file_url' => $fileUrl, // Ganti dari s3_url
             ]);
 
         } catch (\Exception $e) {
-            DB::rollBack(); // Batalkan semua operasi database
+            DB::rollBack(); // Batalkan operasi database
 
-            // Jika file sudah terupload ke S3 tapi DB gagal, hapus lagi filenya
-            if ($path) {
-                Storage::disk('s3')->delete($path);
+            // Jika file sudah terupload ke SeaweedFS tapi DB gagal, hapus lagi filenya
+            if ($seaweedFsId) {
+                // Gunakan ID yang didapat untuk menghapus
+                Storage::disk('seaweedfs')->delete($seaweedFsId);
             }
 
             // Catat error untuk developer
-            Log::error("Upload Gagal: " . $e->getMessage());
+            Log::error("Upload Gagal: " . $e->getMessage() . " on line " . $e->getLine());
 
-            // Kirim respons error yang ramah ke pengguna
+            // Kirim respons error ke pengguna
             return response()->json([
                 'message' => 'Terjadi kesalahan saat meng-upload file.'
             ], 500);

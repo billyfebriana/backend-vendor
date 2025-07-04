@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2d10ea9d5816495a53ecd57be4a63708",
+    "content-hash": "cbdbdbe10432d5e3f99b68822b759c1e",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -5897,6 +5897,91 @@
                 "source": "https://github.com/tijsverkoyen/CssToInlineStyles/tree/v2.3.0"
             },
             "time": "2024-12-21T16:25:41+00:00"
+        },
+        {
+            "name": "tystuyfzand/flysystem-seaweedfs",
+            "version": "v1.1.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/tystuyfzand/flysystem-seaweedfs.git",
+                "reference": "6efe03caf52dca3461a5e65c078a832ef228bf02"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/tystuyfzand/flysystem-seaweedfs/zipball/6efe03caf52dca3461a5e65c078a832ef228bf02",
+                "reference": "6efe03caf52dca3461a5e65c078a832ef228bf02",
+                "shasum": ""
+            },
+            "require": {
+                "league/flysystem": "^1.0|^2.0|^3.0",
+                "tystuyfzand/seaweedfs-client": "^1.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "SeaweedFS\\Filesystem\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "ISC"
+            ],
+            "authors": [
+                {
+                    "name": "Tyler Stuyfzand",
+                    "email": "tyler@tystuyfzand.com"
+                }
+            ],
+            "description": "A Flysystem adapter for SeaweedFS",
+            "support": {
+                "issues": "https://github.com/tystuyfzand/flysystem-seaweedfs/issues",
+                "source": "https://github.com/tystuyfzand/flysystem-seaweedfs/tree/v1.1.1"
+            },
+            "time": "2024-09-28T08:21:18+00:00"
+        },
+        {
+            "name": "tystuyfzand/seaweedfs-client",
+            "version": "v1.0.7",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/tystuyfzand/seaweedfs-client.git",
+                "reference": "b2efe3aacd78310d8f8a6c05aa0a28a50628d5ec"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/tystuyfzand/seaweedfs-client/zipball/b2efe3aacd78310d8f8a6c05aa0a28a50628d5ec",
+                "reference": "b2efe3aacd78310d8f8a6c05aa0a28a50628d5ec",
+                "shasum": ""
+            },
+            "require": {
+                "guzzlehttp/guzzle": "^6.0|^7.0"
+            },
+            "suggest": {
+                "ext-memcached": "Enables caching for volumes and metadata using memcached.",
+                "predis/predis": "Enables caching for volumes and metadata using redis."
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "SeaweedFS\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "ISC"
+            ],
+            "authors": [
+                {
+                    "name": "Tyler Stuyfzand",
+                    "email": "tyler@tystuyfzand.com"
+                }
+            ],
+            "description": "A SeaweedFS implementation for PHP based on Guzzle",
+            "support": {
+                "issues": "https://github.com/tystuyfzand/seaweedfs-client/issues",
+                "source": "https://github.com/tystuyfzand/seaweedfs-client/tree/v1.0.7"
+            },
+            "time": "2022-04-02T09:05:38+00:00"
         },
         {
             "name": "vlucas/phpdotenv",

@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\VendorProfileController;
 use App\Http\Controllers\AdminUserController;
+use App\Http\Controllers\UploaderController;
+use App\Http\Controllers\DocumentController;
 
 // Rute untuk autentikasi (registrasi & login)
 Route::post('/register', [AuthController::class, 'register']);
@@ -20,7 +22,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // Rute-rute untuk Vendor Profile (Vendor view)
     Route::get('/vendor/profile', [VendorProfileController::class, 'show']);
     Route::post('/vendor/profile/save', [VendorProfileController::class, 'save']);
-    Route::post('/vendor/documents/{documentType}', [VendorProfileController::class, 'uploadDocument']);
+    Route::post('/vendor/documents/{documentType}', [VendorProfileController::class, 'uploadDocument'])->middleware('auth:sanctum');
+
+
 
     // Rute-rute Admin User Management & Vendor Validation
     Route::get('/admin/users', [AdminUserController::class, 'index']); // Untuk daftar user/vendor
@@ -30,5 +34,10 @@ Route::middleware('auth:sanctum')->group(function () {
     // {id} di sini adalah user_id dari user vendor yang akan divalidasi
     Route::get('/admin/vendors/{id}/validate', [AdminUserController::class, 'showVendorForValidation']);
     Route::post('/admin/vendors/{id}/validate', [AdminUserController::class, 'updateVendorValidation']);
+
+
 });
+
+    Route::post('/documents/upload', [DocumentController::class, 'upload']);
+    Route::get('/documents/{id}/download', [DocumentController::class, 'download']);
 

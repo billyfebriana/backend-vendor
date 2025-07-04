@@ -2,44 +2,42 @@
 
 namespace App\Providers;
 
+// Pastikan namespace ini benar, tidak ada typo
+use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Storage;
-use IlluminateSupport\ServiceProvider;
 use League\Flysystem\Filesystem;
 
-// --- PERUBAHAN DI SINI ---
-// Kita akan menggunakan Client dan Adapter dari paket 'tystuyfzand'
-// yang sudah terinstall di project kamu.
+// 'use' statement yang benar untuk paket 'tystuyfzand' yang sudah terinstall
 use SeaweedFS\Client;
 use SeaweedFS\Filesystem\SeaweedFSAdapter;
 
 class SeaweedFSServiceProvider extends ServiceProvider
 {
     /**
-     * Register services.
+     * Register any application services.
      */
     public function register(): void
     {
-        //
+        // Biarkan kosong
     }
 
     /**
-     * Bootstrap services.
+     * Bootstrap any application services.
      */
     public function boot(): void
     {
-        // Di sini kita "mengajari" Laravel cara membuat driver 'seaweedfs'
-        // menggunakan resep yang benar untuk paket 'tystuyfzand'.
+        // Daftarkan driver 'seaweedfs' ke Storage Laravel.
         Storage::extend('seaweedfs', function ($app, $config) {
 
-            // 1. Buat dulu client-nya dengan base_uri dari config
+            // 1. Buat instance Client untuk koneksi ke master server.
             $client = new Client([
                 'base_uri' => $config['base_uri'],
             ]);
 
-            // 2. Buat adapter-nya dengan client yang sudah dibuat
+            // 2. Buat Adapter Flysystem dengan client yang sudah dibuat.
             $adapter = new SeaweedFSAdapter($client);
 
-            // 3. Kembalikan filesystem baru dengan adapter tersebut
+            // 3. Kembalikan instance Filesystem yang siap pakai.
             return new Filesystem($adapter);
         });
     }
